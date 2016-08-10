@@ -10,5 +10,5 @@
   "Description": "Regenerates Stamina every set amount",
   "UniqueID": "",
   "PerSaveConfigs": false,
-  "EntryDll": "StaminaReg.cs"
+  "EntryDll": "StaminaRegen.dll"
 }
