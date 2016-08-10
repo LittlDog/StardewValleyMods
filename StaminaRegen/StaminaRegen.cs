@@ -10,25 +10,6 @@ namespace StaminaRegen
 {
     public class StaminaRegenMod : Mod
     {
-        public override string Name
-        {
-            get { return "Stamina Regen"; }
-        }
-
-        public override string Authour
-        {
-            get { return "Natfoth"; }
-        }
-
-        public override string Version
-        {
-            get { return "1.1"; }
-        }
-
-        public override string Description
-        {
-            get { return "Regenerates Stamina every set amount"; }
-        }
 
         public override void Entry()
         {
