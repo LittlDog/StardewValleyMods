@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +11,11 @@ namespace StaminaRegen
 {
     public class StaminaRegenMod : Mod
     {
-
-        public override void Entry()
+                
+        public override void Entry(params object[] objects)
         {
             ReadConfig();
-            Events.UpdateTick += Events_UpdateTick;
+            StardewModdingAPI.Events.GameEvents.UpdateTick += GameEvents_UpdateTick;
         }
 
         private float RegenTime = 3.0f;
@@ -22,7 +23,7 @@ namespace StaminaRegen
 
         private double prevTime = 0;
 
-        void Events_UpdateTick()
+        void GameEvents_UpdateTick(object sender, EventArgs e)
         {
             if (Game1.player == null || !Game1.hasLoadedGame)
                 return;
@@ -33,14 +34,14 @@ namespace StaminaRegen
             prevTime = Game1.currentGameTime.TotalGameTime.TotalSeconds;
 
             Game1.player.Stamina += RegenAmount;
-
         }
 
         private void ReadConfig()
         {
-            if (System.IO.File.Exists("StaminaRegen_Config.ini"))
+          var configLocation = Path.Combine(PathOnDisk, "StaminaRegenConfig.ini");
+            if (File.Exists(configLocation))
             {
-                var fileData = System.IO.File.ReadAllLines("StaminaRegen_Config.ini");
+                var fileData = File.ReadAllLines(configLocation);
                 if (fileData.Length > 1)
                 {
                     //Load in TickRate
@@ -68,8 +69,9 @@ namespace StaminaRegen
                 var dataToWrite = @"RegenTickRate: 3
 RegenAmount: 1";
 
-                System.IO.File.WriteAllText("StaminaRegen_Config.ini", dataToWrite);
+                File.WriteAllText(configLocation, dataToWrite);
             }
         }
+
     }
 }
