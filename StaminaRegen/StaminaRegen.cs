@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,87 +9,95 @@ using StardewValley;
 
 namespace StaminaRegen
 {
-    public class StaminaRegenMod : Mod
+  public class StaminaRegenMod : Mod
+  {
+
+    public override void Entry(params object[] objects)
     {
-        public override string Name
-        {
-            get { return "Stamina Regen"; }
-        }
-
-        public override string Authour
-        {
-            get { return "Natfoth"; }
-        }
-
-        public override string Version
-        {
-            get { return "1.1"; }
-        }
-
-        public override string Description
-        {
-            get { return "Regenerates Stamina every set amount"; }
-        }
-
-        public override void Entry()
-        {
-            ReadConfig();
-            Events.UpdateTick += Events_UpdateTick;
-        }
-
-        private float RegenTime = 3.0f;
-        private int RegenAmount = 1;
-
-        private double prevTime = 0;
-
-        void Events_UpdateTick()
-        {
-            if (Game1.player == null || !Game1.hasLoadedGame)
-                return;
-
-            if (Game1.currentGameTime.TotalGameTime.TotalSeconds < prevTime + RegenTime)
-                return;
-
-            prevTime = Game1.currentGameTime.TotalGameTime.TotalSeconds;
-
-            Game1.player.Stamina += RegenAmount;
-
-        }
-
-        private void ReadConfig()
-        {
-            if (System.IO.File.Exists("StaminaRegen_Config.ini"))
-            {
-                var fileData = System.IO.File.ReadAllLines("StaminaRegen_Config.ini");
-                if (fileData.Length > 1)
-                {
-                    //Load in TickRate
-                    var regenTickRateString = fileData[0];
-                    regenTickRateString = regenTickRateString.Replace("RegenTickRate:", "").Trim();
-                    int newRate;
-                    if (int.TryParse(regenTickRateString, out newRate))
-                    {
-                        RegenTime = Math.Max(1, newRate);
-                    }
-
-                    //Load in Amount
-                    var regenAmountString = fileData[1];
-                    regenAmountString = regenAmountString.Replace("RegenAmount:", "").Trim();
-                    int newAmount;
-                    if (int.TryParse(regenAmountString, out newAmount))
-                    {
-                        RegenAmount = newAmount;
-                    }
-
-                }
-            }
-            else
-            {
-                var dataToWrite = @"RegenTickRate: 3
-RegenAmount: 1";
-
-                System.IO.File.WriteAllText("StaminaRegen_Config.ini", dataToWrite);
-            }
-        }
+      ReadConfig();
+      StardewModdingAPI.Events.GameEvents.UpdateTick += GameEvents_UpdateTick;
     }
+
+    private float RegenTime = 3.0f;
+    private int StaminaRegenAmount = 1;
+    private int HealthRegenAmount = 1;
+
+    private double prevTime = 0;
+
+    void GameEvents_UpdateTick(object sender, EventArgs e)
+    {
+      if (Game1.player == null || !Game1.hasLoadedGame)
+        return;
+
+      if (Game1.currentGameTime.TotalGameTime.TotalSeconds < prevTime + RegenTime)
+        return;
+
+      prevTime = Game1.currentGameTime.TotalGameTime.TotalSeconds;
+
+      if (Game1.player.stamina < Game1.player.maxStamina)
+      {
+        Game1.player.stamina += StaminaRegenAmount;
+      }
+      else
+      {
+        Game1.player.stamina = Game1.player.maxStamina;
+      }
+      if (Game1.player.health < Game1.player.maxHealth)
+      {
+        Game1.player.health += HealthRegenAmount;
+      }
+      else
+      {
+        Game1.player.health = Game1.player.maxHealth;
+      }
+    }
+
+    private void ReadConfig()
+    {
+      var configLocation = Path.Combine(PathOnDisk, "StaminaRegenConfig.ini");
+      if (File.Exists(configLocation))
+      {
+        var fileData = File.ReadAllLines(configLocation);
+        if (fileData.Length > 1)
+        {
+          //Load in RegenTickRate
+          var regenTickRateString = fileData[0];
+          regenTickRateString = regenTickRateString.Replace("RegenTickRate:", "").Trim();
+          int newRate;
+          if (int.TryParse(regenTickRateString, out newRate))
+          {
+            RegenTime = Math.Max(1, newRate);
+          }
+
+          //Load in StaminaRegenAmount
+          var staminaRegenAmountString = fileData[1];
+          staminaRegenAmountString = staminaRegenAmountString.Replace("StaminaRegenAmount:", "").Trim();
+          int newStaminaAmount;
+          if (int.TryParse(staminaRegenAmountString, out newStaminaAmount))
+          {
+            StaminaRegenAmount = newStaminaAmount;
+          }
+
+          //Load in HealthRegenAmount
+          var healthRegenAmountString = fileData[2];
+          healthRegenAmountString = healthRegenAmountString.Replace("HealthRegenAmount:", "").Trim();
+          int newHealthAmount;
+          if (int.TryParse(healthRegenAmountString, out newHealthAmount))
+          {
+            HealthRegenAmount = newHealthAmount;
+          }
+
+        }
+      }
+      else
+      {
+        var dataToWrite = @"RegenTickRate: 3
+StaminaRegenAmount: 1
+HealthRegenAmount: 1";
+
+        File.WriteAllText(configLocation, dataToWrite);
+      }
+    }
+
+  }
 }
