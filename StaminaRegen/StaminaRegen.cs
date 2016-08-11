@@ -34,8 +34,22 @@ namespace StaminaRegen
 
       prevTime = Game1.currentGameTime.TotalGameTime.TotalSeconds;
 
-      Game1.player.Stamina += StaminaRegenAmount;
-      Game1.player.health += HealthRegenAmount;
+      if (Game1.player.stamina < Game1.player.maxStamina)
+      {
+        Game1.player.stamina += StaminaRegenAmount;
+      }
+      else
+      {
+        Game1.player.stamina = Game1.player.maxStamina;
+      }
+      if (Game1.player.health < Game1.player.maxHealth)
+      {
+        Game1.player.health += HealthRegenAmount;
+      }
+      else
+      {
+        Game1.player.health = Game1.player.maxHealth;
+      }
     }
 
     private void ReadConfig()
